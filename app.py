@@ -51,7 +51,7 @@ def run_download_job(urls_text, cookies_text):
             line = line.rstrip()
             with log_lock:
                 logs.append(line)
-                if len(logs) > 2000:
+                if len(logs) > 100000:
                     logs.pop(0)
             print(line)
         
