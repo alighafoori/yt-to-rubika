@@ -1,0 +1,29 @@
+# Sensitive data files
+rubika_session.rp
+rubika_session.session
+rubika_session.sqlite
+*.rp
+*.session
+cookies.txt
+urls.txt
+direct_urls.txt
+.env
+
+# Data directory (downloaded files)
+/data/
+data/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Docker artifacts
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Local configs
+docker-compose.override.yml

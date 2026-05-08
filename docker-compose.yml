@@ -1,0 +1,45 @@
+services:
+  yt-to-rubika:
+    image: ghcr.io/alighafoori/yt-to-rubika/yt-to-rubika:latest # Change to your repository
+    container_name: yt-to-rubika
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+    volumes:
+      - ./data:/app/data
+      # Mount your session file if it exists
+      - ./rubika_session.rp:/app/rubika_session.rp:ro
+    networks:
+      - traefik-network
+    
+    # if use traefik
+    
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.yt-to-rubika.rule=Host(`example.com`)"  # Change to your domain
+    #   - "traefik.http.routers.yt-to-rubika.entrypoints=websecure"
+    #   - "traefik.http.routers.yt-to-rubika.tls=true"
+    #   - "traefik.http.routers.yt-to-rubika.tls.certresolver=letsencrypt"
+    #   - "traefik.http.routers.yt-to-rubika.middlewares=auth@file"  # Your existing auth middleware
+    #   - "traefik.http.services.yt-to-rubika.loadbalancer.server.port=5000"
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  traefik-network:
+    external: true

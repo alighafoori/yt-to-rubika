@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Multi Downloader to Rubika</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      h1 {
+        color: #333;
+        border-bottom: 2px solid #4caf50;
+        padding-bottom: 10px;
+      }
+      .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+        border-radius: 5px 5px 0 0;
+      }
+      .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+      .tab button:hover {
+        background-color: #ddd;
+      }
+      .tab button.active {
+        background-color: #4caf50;
+        color: white;
+      }
+      .tabcontent {
+        display: none;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-top: none;
+        background: white;
+        border-radius: 0 0 5px 5px;
+      }
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        margin: 10px 5px 0 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      #stopBtn {
+        background-color: #f44336;
+      }
+      #stopBtn:hover {
+        background-color: #da190b;
+      }
+      #logs {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 10px;
+        font-family: monospace;
+        height: 400px;
+        overflow-y: auto;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .log-line {
+        border-bottom: 1px solid #333;
+        padding: 2px 0;
+      }
+      .info {
+        color: #999;
+        font-size: 12px;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📥 Multi Downloader to Rubika</h1>
+
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'YouTube')" id="defaultOpen">🎬 YouTube Downloader</button>
+      <button class="tablinks" onclick="openTab(event, 'Direct')">📎 Direct File Download</button>
+    </div>
+
+    <div id="YouTube" class="tabcontent">
+      <form id="youtubeForm">
+        <textarea
+          name="urls"
+          rows="5"
+          placeholder="One YouTube URL per line&#10;Example:&#10;https://www.youtube.com/watch?v=xxx&#10;https://youtu.be/xxx"
+          required
+        ></textarea>
+        <br />
+        <textarea
+          name="cookies"
+          rows="3"
+          placeholder="Netscape format cookies.txt (optional for age-restricted videos)"
+        ></textarea>
+        <br />
+        <div class="info">💡 YouTube format: 720p max, MP4 format with audio</div>
+      </form>
+    </div>
+
+    <div id="Direct" class="tabcontent">
+      <form id="directForm">
+        <textarea
+          name="urls"
+          rows="5"
+          placeholder="One direct file URL per line&#10;Example:&#10;https://example.com/file.pdf&#10;https://cdn.example.com/video.mp4&#10;https://images.example.com/photo.jpg"
+          required
+        ></textarea>
+        <br />
+        <div class="info">
+          💡 Supports any file type: PDF, MP4, JPG, ZIP, etc. Files will be uploaded to Rubika with original names.
+        </div>
+      </form>
+    </div>
+
+    <div style="margin-top: 20px">
+      <button type="submit" id="startBtn" form="youtubeForm">▶ Start Download & Upload</button>
+      <button type="button" id="stopBtn" disabled>⏹ Stop Job</button>
+    </div>
+
+    <h3>📋 Live Logs:</h3>
+    <div id="logs"></div>
+
+    <script>
+      let offset = 0
+      let currentForm = 'youtubeForm'
+      let pollingTimeout = null
+
+      function openTab(evt, tabName) {
+        var i, tabcontent, tablinks
+        tabcontent = document.getElementsByClassName('tabcontent')
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = 'none'
+        }
+        tablinks = document.getElementsByClassName('tablinks')
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(' active', '')
+        }
+        document.getElementById(tabName).style.display = 'block'
+        evt.currentTarget.className += ' active'
+
+        // Update submit button to use current form
+        if (tabName === 'YouTube') {
+          currentForm = 'youtubeForm'
+          document.getElementById('startBtn').setAttribute('form', 'youtubeForm')
+        } else {
+          currentForm = 'directForm'
+          document.getElementById('startBtn').setAttribute('form', 'directForm')
+        }
+      }
+
+      function appendLogs(logs) {
+        const logsDiv = document.getElementById('logs')
+        logs.forEach((log) => {
+          const line = document.createElement('div')
+          line.className = 'log-line'
+          line.textContent = log
+          logsDiv.appendChild(line)
+        })
+        logsDiv.scrollTop = logsDiv.scrollHeight
+      }
+
+      async function pollLogs() {
+        try {
+          const response = await fetch(`/api/status?offset=${offset}`)
+          const data = await response.json()
+
+          if (data.logs && data.logs.length > 0) {
+            appendLogs(data.logs)
+            offset = data.offset
+          }
+
+          if (!data.running) {
+            // Job finished – stop polling completely
+            document.getElementById('startBtn').disabled = false
+            document.getElementById('stopBtn').disabled = true
+            appendLogs(['=== Polling stopped, job finished ==='])
+            return // no more scheduling
+          }
+        } catch (err) {
+          console.error('Polling error:', err)
+          // On network error, just schedule next try after a short wait
+        }
+
+        // Schedule next poll only after this one finished (or after error)
+        pollingTimeout = setTimeout(pollLogs, 1000)
+      }
+
+      function stopPolling() {
+        if (pollingTimeout) {
+          clearTimeout(pollingTimeout)
+          pollingTimeout = null
+        }
+      }
+
+      async function handleStart(e) {
+        e.preventDefault()
+
+        let formData
+        let jobType
+
+        if (currentForm === 'youtubeForm') {
+          const form = document.getElementById('youtubeForm')
+          formData = {
+            type: 'youtube',
+            urls: form.urls.value,
+            cookies: form.cookies.value
+          }
+          jobType = 'YouTube'
+        } else {
+          const form = document.getElementById('directForm')
+          formData = {
+            type: 'direct',
+            urls: form.urls.value
+          }
+          jobType = 'Direct'
+        }
+
+        const response = await fetch('/api/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+
+        if (response.status === 409) {
+          alert('A download job is already running!')
+          return
+        }
+
+        if (!response.ok) {
+          alert('Failed to start job')
+          return
+        }
+
+        document.getElementById('logs').innerHTML = ''
+        offset = 0
+        document.getElementById('startBtn').disabled = true
+        document.getElementById('stopBtn').disabled = false
+
+        stopPolling()
+        pollLogs()
+      }
+
+      document.getElementById('startBtn').addEventListener('click', handleStart)
+      document.getElementById('startBtn').setAttribute('form', 'youtubeForm')
+
+      document.getElementById('stopBtn').onclick = async () => {
+        const response = await fetch('/api/stop', { method: 'POST' })
+        if (response.ok) {
+          stopPolling()
+          document.getElementById('startBtn').disabled = false
+          document.getElementById('stopBtn').disabled = true
+          appendLogs(['=== Stop requested ==='])
+        } else {
+          const data = await response.json()
+          alert(data.error || 'No job to stop')
+        }
+      }
+
+      // Open default tab
+      document.getElementById('defaultOpen').click()
+    </script>
+  </body>
+</html>
