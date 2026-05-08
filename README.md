@@ -1,188 +1,188 @@
 ```markdown
-# 🎬 YouTube & Direct Downloader to Rubika
+# 🎬 دانلودر یوتیوب و مستقیم به روبیکا
 
-A web-based tool to download videos from YouTube (using `yt-dlp`) and files from direct URLs (using `curl`), then automatically upload them to your Rubika account.
+یک ابزار تحت وب برای دانلود ویدیو از یوتیوب (با استفاده از `yt-dlp`) و فایل از آدرس‌های مستقیم (با استفاده از `curl`) و سپس آپلود خودکار به حساب روبیکای شما.
 
-## ✨ Features
+## ✨ قابلیت‌ها
 
-- **YouTube Downloader**: Download videos (720p max with audio, MP4 format)
-- **Direct File Downloader**: Download any file type (PDF, ZIP, MP4, images, etc.) from direct URLs
-- **Web Interface**: Clean, responsive UI with live logging
-- **Docker Support**: Easy deployment with Docker Compose
-- **Automatic Upload**: Files are automatically uploaded to your Rubika account
-- **Session Persistence**: Rubika login session saved for repeated use
+- **دانلودر یوتیوب**: دانلود ویدیو (حداکثر 720p همراه با صدا، فرمت MP4)
+- **دانلودر مستقیم فایل**: دانلود هر نوع فایل (PDF، ZIP، MP4، تصاویر و غیره) از آدرس‌های مستقیم
+- **رابط کاربری وب**: ظاهر تمیز و واکنش‌گرا با لاگ زنده
+- **پشتیبانی از داکر**: استقرار آسان با Docker Compose
+- **آپلود خودکار**: فایل‌ها به صورت خودکار به حساب روبیکای شما آپلود می‌شوند
+- **پایداری نشست**: ذخیره نشست ورود به روبیکا برای استفاده مجدد
 
-## 🚀 Quick Start
+## 🚀 شروع سریع
 
-### Prerequisites
+### پیش‌نیازها
 
-- Docker and Docker Compose
-- A Rubika account
+- Docker و Docker Compose
+- یک حساب روبیکا
 
-### 1. Clone the Repository
+### 1. کلون کردن مخزن
 
 ```bash
 git clone https://github.com/alighafoori/yt-to-rubika.git
 cd yt-to-rubika
 ```
 
-### 2. Set Up Rubika Authentication
+### 2. تنظیم احراز هویت روبیکا
 
-You need to generate a Rubika session file **before** running the container:
+قبل از اجرای کانتینر باید یک فایل نشست روبیکا ایجاد کنید:
 
 ```bash
-# Install required Python packages
+# نصب پکیج‌های مورد نیاز پایتون
 pip install rubpy python-dotenv
 
-# Create a .env file (optional, default session name is "rubika_session")
+# ایجاد فایل env. (اختیاری، نام پیش‌فرض نشست "rubika_session" است)
 echo "RUBIKA_SESSION=rubika_session" > .env
 
-# Run the login script
+# اجرای اسکریپت ورود
 python rubika-login.py
 ```
 
-**Login Process:**
-1. You'll be prompted to enter your phone number (with country code, e.g., `+989123456789`)
-2. Rubika will send a verification code to your number
-3. Enter the verification code when prompted
-4. A `rubika_session.rp` file will be created in the current directory
+**مراحل ورود:**
+1. از شما خواسته می‌شود شماره تلفن خود را وارد کنید (با کد کشور، مثال: `+989123456789`)
+2. روبیکا یک کد تأیید برای شماره شما ارسال می‌کند
+3. کد تأیید را هنگام درخواست وارد کنید
+4. فایل `rubika_session.rp` در دایرکتوری فعلی ایجاد می‌شود
 
-> **Note:** The session file keeps you logged in. Keep it secure and never commit it to version control.
+> **نکته:** فایل نشست شما را وارد شده نگه می‌دارد. آن را امن نگه دارید و هرگز در نسخه‌های کنترل (Git) commit نکنید.
 
-### 3. Configure Docker Compose
+### 3. پیکربندی Docker Compose
 
-Edit `docker-compose.yml`:
+فایل `docker-compose.yml` را ویرایش کنید:
 
-- **Change the image path** (line 5) to your own repository:
+- **مسیر تصویر را تغییر دهید** (خط ۵) به مخزن خودتان:
   ```yaml
   image: ghcr.io/YOUR_USERNAME/yt-to-rubika/yt-to-rubika:latest
   ```
 
-- **Mount your session file** (already configured):
+- **فایل نشست خود را mount کنید** (از قبل پیکربندی شده):
   ```yaml
   volumes:
     - ./data:/app/data
     - ./rubika_session.rp:/app/rubika_session.rp:ro
   ```
 
-- **Optional**: Uncomment and configure Traefik labels if using Traefik as reverse proxy
+- **اختیاری**: اگر از Traefik به عنوان پروکسی معکوس استفاده می‌کنید، برچسب‌های Traefik را از حالت توضیح خارج کنید
 
-### 4. Build and Run
+### 4. ساخت و اجرا
 
 ```bash
-# Build the Docker image
+# ساخت ایمیج داکر
 docker compose build
 
-# Run the container
+# اجرای کانتینر
 docker compose up -d
 ```
 
-The web interface will be available at `http://localhost:5000`
+رابط کاربری وب در آدرس `http://localhost:5000` در دسترس خواهد بود.
 
-### 5. Using the Web Interface
+### 5. استفاده از رابط وب
 
-#### 🎬 Downloading YouTube Videos
+#### 🎬 دانلود ویدیوهای یوتیوب
 
-1. Switch to the **"YouTube Downloader"** tab
-2. Enter one YouTube URL per line (supports both `youtube.com` and `youtu.be`)
-3. **Optional**: Provide cookies for age-restricted videos or private playlists (Netscape format)
-4. Click **"Start Download & Upload"**
+1. به تب **"دانلودر یوتیوب"** بروید
+2. در هر خط یک آدرس یوتیوب وارد کنید (هم `youtube.com` و هم `youtu.be` پشتیبانی می‌شود)
+3. **اختیاری**: برای ویدیوهای دارای محدودیت سنی یا لیست‌های پخش خصوصی، کوکی ارائه دهید (فرمت Netscape)
+4. روی **"شروع دانلود و آپلود"** کلیک کنید
 
-#### 📎 Downloading Direct Files
+#### 📎 دانلود فایل‌های مستقیم
 
-1. Switch to the **"Direct File Download"** tab
-2. Enter one direct file URL per line
-3. Click **"Start Download & Upload"**
+1. به تب **"دانلود مستقیم فایل"** بروید
+2. در هر خط یک آدرس مستقیم فایل وارد کنید
+3. روی **"شروع دانلود و آپلود"** کلیک کنید
 
-The live log pane will show real-time progress. All downloaded files are automatically uploaded to your Rubika account (sent to "Saved Messages").
+پنجره لاگ زنده پیشرفت را در لحظه نشان می‌دهد. تمام فایل‌های دانلود شده به طور خودکار به حساب روبیکای شما آپلود می‌شوند (به "پیام‌های ذخیره شده" ارسال می‌شوند).
 
-## 🍪 Getting YouTube Cookies (Netscape Format)
+## 🍪 دریافت کوکی یوتیوب (فرمت Netscape)
 
-For age-restricted videos or to access private content, you need to provide cookies:
+برای ویدیوهای دارای محدودیت سنی یا دسترسی به محتوای خصوصی، باید کوکی ارائه دهید:
 
-### Using Browser Extensions
+### استفاده از افزونه‌های مرورگر
 
-**Chrome/Edge:**
-1. Install [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
-2. Log into YouTube in your browser
-3. Click the extension icon and select "Export"
-4. Copy the cookies.txt content
+**کروم/اج:**
+1. نصب افزونه [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
+2. در مرورگر خود وارد یوتیوب شوید
+3. روی آیکون افزونه کلیک کنید و "Export" را انتخاب کنید
+4. محتوای cookies.txt را کپی کنید
 
-**Firefox:**
-1. Install [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)
-2. Log into YouTube
-3. Click the extension icon and export cookies
-4. Copy the content
+**فایرفاکس:**
+1. نصب افزونه [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)
+2. وارد یوتیوب شوید
+3. روی آیکون افزونه کلیک کنید و کوکی‌ها را export کنید
+4. محتوا را کپی کنید
 
-**Manual Method (Advanced):**
-1. Log into YouTube in a private/incognito window
-2. Open Developer Tools (F12) → Application/Storage → Cookies
-3. Export using browser tools or use a script
+**روش دستی (پیشرفته):**
+1. در یک پنجره خصوصی/ناشناس وارد یوتیوب شوید
+2. ابزار توسعه‌دهنده (F12) → Application/Storage → Cookies را باز کنید
+3. با استفاده از ابزارهای مرورگر یا اسکریپت export کنید
 
-> ⚠️ **Security Warning**: Cookies contain your login session. Never share them or commit them to version control. Use them only for your own private YouTube access.
+> ⚠️ **اخطار امنیتی**: کوکی‌ها حاوی نشست ورود شما هستند. هرگز آنها را به اشتراک نگذارید یا در نسخه‌های کنترل (Git) commit نکنید. فقط برای دسترسی خصوصی خود به یوتیوب از آنها استفاده کنید.
 
-## 🛠 Architecture
+## 🛠 معماری
 
 ```
-User → Flask Web UI (port 5000)
+کاربر → رابط وب Flask (پورت 5000)
           ↓
-    [Choose job type]
+    [انتخاب نوع کار]
           ↓
-    YouTube Job          Direct Job
+    کار یوتیوب          کار مستقیم
     (d.sh)              (d-direct.sh)
           ↓                  ↓
     yt-dlp              curl
-    downloads           downloads
+    دانلودها            دانلودها
           ↓                  ↓
-    r1.py (Rubika uploader)
+    r1.py (آپلودر روبیکا)
           ↓
-    Rubika account
+    حساب روبیکا
 ```
 
-## 📁 File Structure
+## 📁 ساختار فایل
 
 ```
 yt-to-rubika/
-├── app.py                 # Flask web application
-├── d.sh                   # YouTube download script
-├── d-direct.sh            # Direct file download script
-├── r1.py                  # Rubika uploader
-├── rubika-login.py        # Session creation script
-├── requirements.txt       # Python dependencies
-├── dockerfile            # Docker build instructions
-├── docker-compose.yml    # Docker Compose configuration
-├── .github/workflows/    # GitHub Actions CI/CD
-│   └── build.yml         # Automated Docker build
+├── app.py                 # برنامه وب Flask
+├── d.sh                   # اسکریپت دانلود یوتیوب
+├── d-direct.sh            # اسکریپت دانلود مستقیم فایل
+├── r1.py                  # آپلودر روبیکا
+├── rubika-login.py        # اسکریپت ایجاد نشست
+├── requirements.txt       # وابستگی‌های پایتون
+├── dockerfile            # دستورالعمل ساخت داکر
+├── docker-compose.yml    # پیکربندی Docker Compose
+├── .github/workflows/    # CI/CD گیت‌هاب اکشنز
+│   └── build.yml         # ساخت خودکار داکر
 └── templates/
-    └── index.html        # Web UI template
+    └── index.html        # قالب رابط کاربری وب
 ```
 
-## 🔧 Configuration
+## 🔧 پیکربندی
 
-### Environment Variables
+### متغیرهای محیطی
 
-Create a `.env` file (optional):
+یک فایل `.env` ایجاد کنید (اختیاری):
 
 ```env
-RUBIKA_SESSION=rubika_session  # Name of the session file
+RUBIKA_SESSION=rubika_session  # نام فایل نشست
 ```
 
-### Docker Volumes
+### ولوم‌های داکر
 
-- `./data:/app/data` - Downloaded files storage
-- `./rubika_session.rp:/app/rubika_session.rp:ro` - Rubika session (read-only)
+- `./data:/app/data` - ذخیره‌سازی فایل‌های دانلود شده
+- `./rubika_session.rp:/app/rubika_session.rp:ro` - نشست روبیکا (فقط خواندنی)
 
-## 🛑 Stopping the Service
+## 🛑 توقف سرویس
 
 ```bash
-# Stop the container
+# توقف کانتینر
 docker compose down
 
-# Stop and remove volumes (deletes downloaded files)
+# توقف و حذف ولوم‌ها (فایل‌های دانلود شده حذف می‌شوند)
 docker compose down -v
 ```
 
-## 🔄 Updating
+## 🔄 به‌روزرسانی
 
 ```bash
 git pull
@@ -190,55 +190,56 @@ docker compose build
 docker compose up -d
 ```
 
-## 🐛 Troubleshooting
+## 🐛 عیب‌یابی
 
 ### "Rubika session not found"
-- Run `python rubika-login.py` to create the session file
-- Ensure `rubika_session.rp` is in the same directory as `docker-compose.yml`
-- Check the volume mount path in `docker-compose.yml`
+- برای ایجاد فایل نشست `python rubika-login.py` را اجرا کنید
+- اطمینان حاصل کنید `rubika_session.rp` در همان دایرکتوری `docker-compose.yml` است
+- مسیر mount ولوم را در `docker-compose.yml` بررسی کنید
 
 ### "Job failed with exit code"
-- Check the live logs for specific error messages
-- For YouTube: Verify the URLs are valid and not age-restricted (or add cookies)
-- For direct downloads: Ensure URLs are directly accessible (not behind redirects)
+- برای پیام‌های خطای خاص، لاگ‌های زنده را بررسی کنید
+- برای یوتیوب: بررسی کنید آدرس‌ها معتبر هستند و محدودیت سنی ندارند (یا کوکی اضافه کنید)
+- برای دانلود مستقیم: اطمینان حاصل کنید آدرس‌ها مستقیماً قابل دسترسی هستند (بدون تغییر مسیر)
 
 ### "Cannot connect to Docker daemon"
-- Ensure Docker is running: `sudo systemctl start docker` (Linux)
-- On Windows/macOS, start Docker Desktop
+- اطمینان حاصل کنید داکر در حال اجراست: `sudo systemctl start docker` (لینوکس)
+- در ویندوز/مک، Docker Desktop را راه‌اندازی کنید
 
-### Port 5000 already in use
-- Change the port in `docker-compose.yml`:
+### پورت 5000 قبلاً استفاده می‌شود
+- پورت را در `docker-compose.yml` تغییر دهید:
   ```yaml
   ports:
-    - "5001:5000"  # Use port 5001 on host
+    - "5001:5000"  # استفاده از پورت 5001 روی هاست
   ```
 
-## 📝 Notes
+## 📝 یادداشت‌ها
 
-- YouTube videos are limited to **720p** with audio (MP4 format)
-- Downloaded files are **automatically deleted** from the container after successful upload
-- The web interface keeps the last **2000 log lines** for display
-- Session file is mounted as read-only for security
-- Direct downloads have a **5-minute timeout** per file
+- ویدیوهای یوتیوب به **720p** (همراه با صدا، فرمت MP4) محدود هستند
+- فایل‌های دانلود شده پس از آپلود موفق، **به طور خودکار از کانتینر حذف می‌شوند**
+- رابط وب آخرین **2000 خط لاگ** را برای نمایش نگه می‌دارد
+- فایل نشست به دلایل امنیتی به صورت فقط‑خواندنی mount می‌شود
+- دانلود مستقیم دارای **مهلت ۵ دقیقه‌ای** برای هر فایل است
 
-## 🛡 Security Recommendations
+## 🛡 توصیه‌های امنیتی
 
-1. **Never commit** `rubika_session.rp`, `cookies.txt`, or `.env` to Git
-2. Use `.gitignore` to exclude sensitive files
-3. Run behind a reverse proxy (Traefik/Nginx) with HTTPS for production
-4. Add authentication middleware if exposing to the internet
-5. Regularly rotate Rubika session if compromised
+1. هرگز `rubika_session.rp`، `cookies.txt` یا `.env` را در Git commit نکنید
+2. از `.gitignore` برای حذف فایل‌های حساس استفاده کنید
+3. برای محیط تولید، پشت یک پروکسی معکوس (Traefik/Nginx) با HTTPS اجرا کنید
+4. اگر در معرض اینترنت قرار می‌گیرید، میان‌افزار احراز هویت اضافه کنید
+5. در صورت به خطر افتادن، نشست روبیکا را به طور منظم تغییر دهید
 
-## 📄 License
+## 📄 مجوز
 
-This project is open-source. Use at your own risk.
+این پروژه متن‌باز است. با مسئولیت خود استفاده کنید.
 
-## 🤝 Contributing
+## 🤝 مشارکت
 
-Feel free to open issues or submit pull requests for improvements.
+برای بهبودها، آزادانه issue باز کنید یا pull request ارسال کنید.
 
-## 🙏 Acknowledgments
+## 🙏 قدردانی
 
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - YouTube downloading
-- [rubpy](https://github.com/AliMD/rubpy) - Rubika API client
-- [Flask](https://flask.palletsprojects.com/) - Web framework
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - دانلود یوتیوب
+- [rubpy](https://github.com/AliMD/rubpy) - کلاینت API روبیکا
+- [Flask](https://flask.palletsprojects.com/) - چارچوب وب
+```

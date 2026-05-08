@@ -2,7 +2,7 @@ name: Build and Push YouTube Downloader
 
 on:
   push:
-    branches: [ main ]
+    branches: [ publish ]
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
             ghcr.io/${{ github.repository }}/yt-to-rubika:latest
             ghcr.io/${{ github.repository }}/yt-to-rubika:${{ github.sha }}
       
-      
+
       # - name: Deploy via SSH to Server
       #   uses: appleboy/ssh-action@v1.0.0
       #   with:
